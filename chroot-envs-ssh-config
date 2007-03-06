@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Copyright 2007, FROHNER Ákos <Akos.Frohner@cern.ch>
+# 
+# This software has been released under the GPL license.
+#
+# chroot-envs-ssh-config     
+#
+#   Generating custom ssh client config entries for the chroot environments.
+# 
+
+CHROOT_BASEDIR=/var/chroot
+CHROOT_SSHD_PORT_CONF=${CHROOT_BASEDIR}/sshd-port.conf
+
+for chenv in ${CHROOT_BASEDIR}/*; do
+    if [ -d "${chenv}" ]; then 
+        envname=$(basename $chenv)
+        port=$(awk "/^$envname[ \t]/ { print \$2 }" $CHROOT_SSHD_PORT_CONF)
+        echo "Host $envname"
+        echo "    UserKnownHostsFile ~/.ssh/chroot-${envname}-known_hosts"
+        echo "    Hostname 127.0.0.1"
+        echo "    Port ${port}"
+    fi
+done

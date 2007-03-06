@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# Copyright 2007, FROHNER Ákos <Akos.Frohner@cern.ch>
+# 
+# This software has been released under the GPL license.
+#
+# chroot-envs       Starting and stopping chroot environments.
+# 
+# chkconfig: 345 95 5
+# description: Starting and stopping chroot environments.
+#
+
+CHROOT_BASEDIR=/var/chroot
+CHROOT_ETC=/etc/chroot
+CHROOT_BIND_MOUNT_CONF=${CHROOT_BASEDIR}/bind-mount.conf
+CHROOT_SSHD_PORT_CONF=${CHROOT_BASEDIR}/sshd-port.conf
+#DRYRUN=echo
+
+#
+# self-installing environment
+#
+function check_chroot_etc {
+    chenv="$1"
+    chetc="$1/$CHROOT_ETC"
+
+    # generating the start/stop scripts
+    if [ ! -d ${chetc} ]; then
+        mkdir -p ${chetc}
+    fi
+    if [ ! -x ${chetc}/chroot-start ]; then
+        cat >${chetc}/chroot-start <<EOF
+#! /bin/sh
+mount -a -t proc
+mount -a -t tmpfs
+mount -a -t devpts
+mount -a -t sysfs
+service sshd start
+EOF
+        chmod +x ${chetc}/chroot-start
+    fi
+    if [ ! -x ${chetc}/chroot-stop ]; then
+        cat >${chetc}/chroot-stop <<EOF
+#! /bin/sh
+service sshd stop
+umount -a -t proc
+umount -a -t tmpfs
+umount -a -t devpts
+umount -a -t sysfs
+:> /etc/mtab
+EOF
+        chmod +x ${chetc}/chroot-stop
+    fi
+
+    # customizing sshd port number
+    envname=$(basename $chenv)
+    port=$(awk "/^$envname[ \t]/ { print \$2 }" $CHROOT_SSHD_PORT_CONF)
+    if [ -n "$port" ]; then
+        $DRYRUN sed -i -e "s/^Port.*$/Port $port/" $chenv/etc/ssh/sshd_config
+    fi
+}
+
+case "$1" in
+	start)
+        for chenv in ${CHROOT_BASEDIR}/*; do
+            if [ ! -d "${chenv}" ]; then 
+                continue
+            fi
+            check_chroot_etc "${chenv}"
+            if [ -x ${chenv}/${CHROOT_ETC}/chroot-start ]; then
+                echo "Starting '${chenv}'..."
+                $DRYRUN chroot ${chenv} ${CHROOT_ETC}/chroot-start
+            fi
+            if [ -r "${CHROOT_BIND_MOUNT_CONF}" ]; then
+                grep -v '^#' ${CHROOT_BIND_MOUNT_CONF} | \
+                while read hostdir chrootdir; do
+                    if [ ! -d ${chenv}/${chrootdir} ]; then
+                        $DRYRUN mkdir -p ${chenv}/${chrootdir}
+                    fi
+                    $DRYRUN mount --bind ${hostdir} ${chenv}/${chrootdir}
+                done
+            fi
+        done
+        exit
+		;;
+	stop)
+        for chenv in ${CHROOT_BASEDIR}/*; do
+            if [ ! -d "${chenv}" ]; then 
+                continue
+            fi
+            check_chroot_etc "${chenv}"
+            if [ -x ${chenv}/${CHROOT_ETC}/chroot-stop ]; then
+                echo "Stopping '${chenv}'..."
+                $DRYRUN chroot ${chenv} ${CHROOT_ETC}/chroot-stop
+            fi
+            if [ -r "${CHROOT_BIND_MOUNT_CONF}" ]; then
+                grep -v '^#' ${CHROOT_BIND_MOUNT_CONF} | \
+                while read hostdir chrootdir; do
+                    $DRYRUN umount ${chenv}/${chrootdir}
+                done
+            fi
+        done
+        exit
+		;;
+	reload|restart)
+		$0 stop
+		$0 start
+		exit
+		;;
+	*)
+		echo "Usage: chroot-envs <start|stop|reload|restart>"
+		exit 1
+		;;
+esac
+
