@@ -33,3 +33,13 @@ make prefix=${RPM_BUILD_ROOT}%{prefix} install
 %config %{prefix}/var/chroot/bind-mount.conf
 %config %{prefix}/var/chroot/sshd-port.conf
 
+%changelog
+* Tue Apr 17 2007 Akos FROHNER <Akos.Frohner@cern.ch> 0.2.0-1
+
+- Copying /etc/resolv.conf into the chroot environments.
+
+* Tue Mar  6 2007 Akos FROHNER <Akos.Frohner@cern.ch> 0.1.0-1
+
+- First public release.
+  https://twiki.cern.ch/twiki/bin/view/EGEE/ChrootEnvs
+
