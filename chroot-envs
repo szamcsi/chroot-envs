@@ -57,6 +57,9 @@ EOF
     if [ -n "$port" ]; then
         $DRYRUN sed -i -e "s/^Port.*$/Port $port/" $chenv/etc/ssh/sshd_config
     fi
+
+    # copying the /etc/resolv.conf file
+    $DRYRUN cp /etc/resolv.conf ${chenv}/etc/resolv.conf
 }
 
 case "$1" in
@@ -73,6 +76,11 @@ case "$1" in
             if [ -r "${CHROOT_BIND_MOUNT_CONF}" ]; then
                 grep -v '^#' ${CHROOT_BIND_MOUNT_CONF} | \
                 while read hostdir chrootdir; do
+                    # skip mounting, if it does not exists in host env.
+                    if [ ! -d ${hostdir} ]; then
+                        echo "Warning: ${hostdir} does not exists, so cannot mount."
+                        continue
+                    fi
                     if [ ! -d ${chenv}/${chrootdir} ]; then
                         $DRYRUN mkdir -p ${chenv}/${chrootdir}
                     fi
@@ -95,6 +103,10 @@ case "$1" in
             if [ -r "${CHROOT_BIND_MOUNT_CONF}" ]; then
                 grep -v '^#' ${CHROOT_BIND_MOUNT_CONF} | \
                 while read hostdir chrootdir; do
+                    # skip umounting, if it does not exists in host env.
+                    if [ ! -d ${hostdir} ]; then
+                        continue
+                    fi
                     $DRYRUN umount ${chenv}/${chrootdir}
                 done
             fi
