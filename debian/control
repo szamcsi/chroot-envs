@@ -1,0 +1,15 @@
+Source: chroot-envs
+Section: contrib/utils
+Priority: extra
+Maintainer: FROHNER Ákos <akos@frohner.hu>
+Build-Depends: debhelper (>= 5), coreutils
+Standards-Version: 3.7.2
+
+Package: chroot-envs
+Architecture: all
+Depends: coreutils
+Description: Chroot Environments
+ This package contains a basic daemon startup script to 
+ run Linux images as chroot environments.
+ .
+ It was tested with SLC3 and SLC4, on Debian, Ubuntu and SLC4.

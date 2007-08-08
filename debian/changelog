@@ -1,0 +1,13 @@
+chroot-envs (0.2.0-1) unstable; urgency=low
+
+  * Copying /etc/resolv.conf into the chroot environments.
+
+ -- FROHNER Ákos <akos@frohner.hu>  Tue, 17 Apr 2007 00:00:00 +0100
+
+chroot-envs (0.1.0-1) unstable; urgency=low
+
+  * First public release.
+    https://twiki.cern.ch/twiki/bin/view/EGEE/ChrootEnvs
+
+ -- Tue Mar  6 2007 Akos FROHNER <Akos.Frohner@cern.ch>
+

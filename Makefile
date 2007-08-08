@@ -1,5 +1,6 @@
 
 include VERSION
+DATE=$(shell date +%Y%m%d)
 
 SRC=chroot-envs chroot-envs-ssh-config bind-mount.conf sshd-port.conf
 PACKAGE=chroot-envs-$(VERSION)
@@ -23,19 +24,34 @@ tarball:
 	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
 	rm -rf $(PACKAGE)
 
-rpm:
+rpm: tarball
+	-rm -rf $(BUILD)
 	mkdir -p $(BUILD)
 	mkdir -p $(BUILD)/BUILD
 	mkdir -p $(BUILD)/RPMS
 	mkdir -p $(BUILD)/SRPMS
 	mkdir -p $(BUILD)/SOURCES
 	mkdir -p $(BUILD)/SPECS
-	$(MAKE) tarball
 	cp $(PACKAGE).tar.gz $(BUILD)/SOURCES
 	sed -e 's/@VERSION@/$(VERSION)/g; s/@AGE@/$(AGE)/g' chroot-envs.spec >$(BUILD)/SPECS/chroot-envs.spec
 	cd $(BUILD); rpmbuild --define "_topdir $(PWD)/$(BUILD)" -ba SPECS/chroot-envs.spec
 	cp $(BUILD)/RPMS/*/*.rpm .
 	cp $(BUILD)/SRPMS/*.rpm .
 
+deb: tarball
+	-rm -rf $(BUILD)
+	mkdir -p $(BUILD)
+	cp $(PACKAGE).tar.gz $(BUILD)/$(PACKAGE).orig.tar.gz
+	tar -C $(BUILD) -xzf $(BUILD)/$(PACKAGE).orig.tar.gz
+	cp -a debian $(BUILD)/$(PACKAGE)/
+	cp changelog $(BUILD)/$(PACKAGE)/debian/
+	(cd $(BUILD)/$(PACKAGE); debuild -b)
+	cp $(BUILD)/*.deb .
+
 clean:
 	-rm -rf $(BUILD)
+
+changelog:
+	echo -e "chroot-envs ($(VERSION)-$(DATE))\n\n" >cvs.changelog.header
+	cvs2cl --utc --window 3600 --separate-header --file cvs.changelog --header cvs.changelog.header --no-wrap --prune 
+
