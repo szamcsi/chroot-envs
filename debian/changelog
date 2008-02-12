@@ -1,3 +1,9 @@
+chroot-envs (0.3.0-1) unstable; urgency=low
+
+  * Bound the chrooted ssh daemons to local address only.
+
+ -- FROHNER Ákos <akos@frohner.hu>  Tue, 12 Feb 2008 10:01:00 +0100
+
 chroot-envs (0.2.0-1) unstable; urgency=low
 
   * Copying /etc/resolv.conf into the chroot environments.
