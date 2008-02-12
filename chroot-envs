@@ -57,6 +57,11 @@ EOF
     if [ -n "$port" ]; then
         $DRYRUN sed -i -e "s/^Port.*$/Port $port/" $chenv/etc/ssh/sshd_config
     fi
+    # bound to local address only
+    grep -q '^ListenAddress' $chenv/etc/ssh/sshd_config
+    if [ $? -ne 0 ]; then
+        echo 'ListenAddress 127.0.0.1' >>$chenv/etc/ssh/sshd_config
+    fi
 
     # copying the /etc/resolv.conf file
     $DRYRUN cp /etc/resolv.conf ${chenv}/etc/resolv.conf
