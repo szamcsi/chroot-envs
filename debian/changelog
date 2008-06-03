@@ -1,3 +1,13 @@
+chroot-envs (0.4.0-1) unstable; urgency=low
+
+  * Updated by Ricardo Mendes <ricardo.mendes@cern.ch> to be able to
+    run in a RedHat based hosting environment and to run Debian based
+    chroot environment.
+ 
+  * Do not mount AFS by default.
+
+ -- Frohner Ákos <akos@frohner.hu>  Tue, 03 Jun 2008 23:19:38 +0200
+
 chroot-envs (0.3.0-1) unstable; urgency=low
 
   * Bound the chrooted ssh daemons to local address only.

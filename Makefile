@@ -37,6 +37,8 @@ rpm: tarball
 	cd $(BUILD); rpmbuild --define "_topdir $(PWD)/$(BUILD)" -ba SPECS/chroot-envs.spec
 	cp $(BUILD)/RPMS/*/*.rpm .
 	cp $(BUILD)/SRPMS/*.rpm .
+	rpm --define "__signature gpg" --define "_gpg_name 3CE8DC02" --addsign $(PACKAGE)*.rpm
+
 
 deb: tarball
 	-rm -rf $(BUILD)
@@ -44,7 +46,6 @@ deb: tarball
 	cp $(PACKAGE).tar.gz $(BUILD)/$(PACKAGE).orig.tar.gz
 	tar -C $(BUILD) -xzf $(BUILD)/$(PACKAGE).orig.tar.gz
 	cp -a debian $(BUILD)/$(PACKAGE)/
-	cp changelog $(BUILD)/$(PACKAGE)/debian/
 	(cd $(BUILD)/$(PACKAGE); debuild -b)
 	cp $(BUILD)/*.deb .
 
@@ -54,4 +55,4 @@ clean:
 changelog:
 	echo -e "chroot-envs ($(VERSION)-$(DATE))\n\n" >cvs.changelog.header
 	cvs2cl --utc --window 3600 --separate-header --file cvs.changelog --header cvs.changelog.header --no-wrap --prune 
-
+	dch -v $(VERSION)-$(AGE) -D unstable  
