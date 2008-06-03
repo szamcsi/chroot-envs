@@ -1,6 +1,10 @@
 #!/bin/bash
 #
-# Copyright 2007, FROHNER Ákos <Akos.Frohner@cern.ch>
+# Copyright 2007-2008.
+#
+# Authors:
+#       FROHNER Ákos <Akos.Frohner@cern.ch>
+#       Ricardo Mendes <ricardo.mendes@cern.ch>
 # 
 # This software has been released under the GPL license.
 #
@@ -30,18 +34,35 @@ function check_chroot_etc {
     if [ ! -x ${chetc}/chroot-start ]; then
         cat >${chetc}/chroot-start <<EOF
 #! /bin/sh
-mount -a -t proc
-mount -a -t tmpfs
-mount -a -t devpts
-mount -a -t sysfs
-service sshd start
+# RedHat style mounts: does not work without the 'proc/ proc/' 
+# style suffixes, on the other hand it does not hurt elsewhere.
+mount -a -t proc proc/ proc/
+mount -a -t tmpfs tmp/ tmp/
+mount -a -t devpts dev/pts/ dev/pts/
+mount -a -t sysfs sys/ sys/
+if [ -f /etc/init.d/sshd ]; then
+  # Redhat based
+  /etc/init.d/sshd start 
+elif [ -f /etc/init.d/ssh ]; then
+  # Debian based
+  /etc/init.d/ssh start 
+else
+  # Unknown OS or sshd is not installed
+  echo "Error: cannot start sshd" >&2
+fi
 EOF
         chmod +x ${chetc}/chroot-start
     fi
     if [ ! -x ${chetc}/chroot-stop ]; then
         cat >${chetc}/chroot-stop <<EOF
 #! /bin/sh
-service sshd stop
+if [ -f /etc/init.d/sshd ]; then
+  /etc/init.d/sshd stop
+elif [ -f /etc/init.d/ssh ]; then
+  /etc/init.d/ssh stop
+else
+  echo "Error: cannot stop sshd" >&2
+fi
 umount -a -t proc
 umount -a -t tmpfs
 umount -a -t devpts
