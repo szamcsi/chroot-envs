@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# Copyright 2007, FROHNER Ákos <Akos.Frohner@cern.ch>
+# 
+# This software has been released under the GPL license.
+#
+# chroot-envs-create-user
+#
+#   Creating the specified user in the chroot environments.
+# 
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $(basename $0) username" >&2
+    exit 1
+fi
+username=$1
+id "$username" >/dev/null 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "ERROR: user '$username' does not exists!" >&2
+    exit 2
+fi
+
+if [ $(id -u) -ne 0 ]; then
+    echo "WARNING: not running as 'root', so only printing the commands."
+    DRYRUN='echo'
+fi
+
+CHROOT_BASEDIR=/var/chroot
+
+for chenv in ${CHROOT_BASEDIR}/*; do
+    if [ -d "${chenv}" ]; then 
+        envname=$(basename $chenv)
+        
+        # copying the user
+        grep -q "$username:" ${chenv}/etc/passwd
+        if [ $? -eq 0 ]; then
+            echo "INFO: user '$username' already exists in '${envname}'."
+        else
+            echo "grep \"^$username:\" /etc/passwd >> ${chenv}/etc/passwd"
+            echo "grep \"^$username:\" /etc/shadow >> ${chenv}/etc/shadow"
+            if [ -z "$DRYRUN" ]; then
+                if [ ! -f "${chenv}/etc/passwd.chroot-backup" ]; then
+                    cp -p ${chenv}/etc/passwd ${chenv}/etc/passwd.chroot-backup
+                fi
+                grep "^$username:" /etc/passwd >> ${chenv}/etc/passwd
+                if [ ! -f "${chenv}/etc/shadow.chroot-backup" ]; then
+                    cp -p ${chenv}/etc/shadow ${chenv}/etc/shadow.chroot-backup
+                fi
+                grep "^$username:" /etc/shadow >> ${chenv}/etc/shadow
+            fi
+        fi
+
+        # copying the user's group
+        groupname=$(id -gn "$username")
+        grep -q "$groupname:" ${chenv}/etc/group
+        if [ $? -eq 0 ]; then
+            echo "INFO: group '$groupname' already exists in '${envname}'."
+        else
+            echo "grep \"^$groupname:\" /etc/group >> ${chenv}/etc/group"
+            echo "grep \"^$groupname:\" /etc/gshadow >> ${chenv}/etc/gshadow"
+            if [ -z "$DRYRUN" ]; then
+                if [ ! -f "${chenv}/etc/group.chroot-backup" ]; then
+                    cp -p ${chenv}/etc/group ${chenv}/etc/group.chroot-backup
+                fi
+                grep "^$groupname:" /etc/group >> ${chenv}/etc/group
+                if [ ! -f "${chenv}/etc/gshadow.chroot-backup" ]; then
+                    cp -p ${chenv}/etc/gshadow ${chenv}/etc/gshadow.chroot-backup
+                fi
+                grep "^$groupname:" /etc/gshadow >> ${chenv}/etc/gshadow
+            fi
+        fi
+
+        # creating the HOME directory
+        homedir=$(awk -F':' "/^$username:/ { print \$6 }" /etc/passwd)
+        if [ -d ${chenv}/${homedir} ]; then
+            echo "INFO: '$homedir' already exists in '${envname}'."
+        else
+            $DRYRUN mkdir -p ${chenv}/${homedir}
+            $DRYRUN chown $username.$groupname ${chenv}/${homedir}
+        fi
+    fi
+done
