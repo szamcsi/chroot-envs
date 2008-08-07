@@ -12,4 +12,4 @@ Description: Chroot Environments
  This package contains a basic daemon startup script to 
  run Linux images as chroot environments.
  .
- It was tested with SLC3 and SLC4, on Debian, Ubuntu and SLC4.
+ It was tested with SLC3, SLC4 and SL5 on Debian, Ubuntu and SLC4.

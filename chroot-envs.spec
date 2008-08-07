@@ -13,7 +13,7 @@ Prefix: /
 %description
 This package contains a basic daemon startup script to 
 run Linux images as chroot environments.
-It was tested with SLC3 and SLC4.
+It was tested with SLC3, SLC4 and SL5
 
 %prep
 %setup -q
@@ -30,16 +30,8 @@ make prefix=${RPM_BUILD_ROOT}%{prefix} install
 %defattr(-,root,root)
 %attr(755,root,root) %{prefix}/etc/init.d/chroot-envs
 %attr(755,root,root) %{prefix}/usr/bin/chroot-envs-ssh-config
+%attr(755,root,root) %{prefix}/usr/sbin/chroot-envs-create-user
 %config %{prefix}/var/chroot/bind-mount.conf
 %config %{prefix}/var/chroot/sshd-port.conf
 
 %changelog
-* Tue Apr 17 2007 Akos FROHNER <Akos.Frohner@cern.ch> 0.2.0-1
-
-- Copying /etc/resolv.conf into the chroot environments.
-
-* Tue Mar  6 2007 Akos FROHNER <Akos.Frohner@cern.ch> 0.1.0-1
-
-- First public release.
-  https://twiki.cern.ch/twiki/bin/view/EGEE/ChrootEnvs
-
