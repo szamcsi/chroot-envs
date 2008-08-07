@@ -60,3 +60,4 @@ clean:
 changelog:
 	git-log $(shell git-tag | tail -1).. >changes
 	dch -v $(VERSION)-$(AGE) -D unstable  
+	-rm -f changes
