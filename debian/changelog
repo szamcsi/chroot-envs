@@ -1,3 +1,17 @@
+chroot-envs (0.6.0-1) unstable; urgency=low
+
+  * sshd fix: if there is no 'Port' specified, then it needs to be added, and
+    it has to be before ListenAddress
+
+  * sshd fix: if /var/run/utmp of the chroot env comes from a shut down
+    machine, then it might report 0 or 6 runlevel, thus 'sshd' may decide to
+    kill all ssh processes.  Copying 'utmp' from the real OS.
+
+  * Marking config files for Debian that they are not
+    overwritten with new version of the package.
+
+ -- Frohner Ákos <akos@frohner.hu>  Wed, 24 Sep 2008 14:41:48 +0300
+
 chroot-envs (0.5.0-1) unstable; urgency=low
 
   * Command to copy a user to the chroot environments.
