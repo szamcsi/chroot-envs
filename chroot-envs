@@ -74,18 +74,30 @@ EOF
 
     # customizing sshd port number
     envname=$(basename $chenv)
-    port=$(awk "/^$envname[ \t]/ { print \$2 }" $CHROOT_SSHD_PORT_CONF)
-    if [ -n "$port" ]; then
-        $DRYRUN sed -i -e "s/^Port.*$/Port $port/" $chenv/etc/ssh/sshd_config
-    fi
+
     # bound to local address only
     grep -q '^ListenAddress' $chenv/etc/ssh/sshd_config
     if [ $? -ne 0 ]; then
         echo 'ListenAddress 127.0.0.1' >>$chenv/etc/ssh/sshd_config
     fi
 
+    # special port number for the instance
+    port=$(awk "/^$envname[ \t]/ { print \$2 }" $CHROOT_SSHD_PORT_CONF)
+    if [ -n "$port" ]; then
+        grep -q '^Port' $chenv/etc/ssh/sshd_config
+        if [ $? -ne 0 ]; then
+            # 'Port' has to come before 'ListenAddress'
+            $DRYRUN sed -i -e "s/^ListenAddress.*/Port $port\n&/" $chenv/etc/ssh/sshd_config
+        else
+            $DRYRUN sed -i -e "s/^Port.*$/Port $port/" $chenv/etc/ssh/sshd_config
+        fi
+    fi
+
     # copying the /etc/resolv.conf file
-    $DRYRUN cp /etc/resolv.conf ${chenv}/etc/resolv.conf
+    $DRYRUN cp -p /etc/resolv.conf ${chenv}/etc/resolv.conf
+
+    # copying the 'utmp' file that runlevel sees the reality
+    $DRYRUN cp -p /var/run/utmp ${chenv}/var/run/utmp
 }
 
 case "$1" in
