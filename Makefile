@@ -57,6 +57,9 @@ deb: tarball
 clean:
 	-rm -rf $(BUILD)
 
+distclean: clean
+	-rm -f *.deb *.rpm *.tar.gz
+
 changelog:
 	git-log $(shell git-tag | tail -1).. >changes
 	dch -v $(VERSION)-$(AGE) -D unstable  
