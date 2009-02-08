@@ -5,7 +5,7 @@ DATE=$(shell date +%Y%m%d)
 SRC=chroot-envs chroot-envs-ssh-config \
 	chroot-envs-create-user \
 	bind-mount.conf sshd-port.conf
-PACKAGE=chroot-envs-$(VERSION)
+PACKAGE=chroot-envs_$(VERSION)
 BUILD=build
 
 default:

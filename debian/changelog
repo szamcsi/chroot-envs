@@ -1,4 +1,4 @@
-chroot-envs (0.6.0-1) unstable; urgency=low
+chroot-envs (0.6.0-1) intrepid; urgency=low
 
   * sshd fix: if there is no 'Port' specified, then it needs to be added, and
     it has to be before ListenAddress
