@@ -2,9 +2,9 @@ Summary: Running chroot environments.
 Name: chroot-envs
 Version: @VERSION@
 Release: @AGE@
-Source: chroot-envs_%{version}.tar.gz
+Source: chroot-envs-%{version}.tar.gz
 Group: admin
-BuildRoot: %{_builddir}/%{name}_%{version}-root
+BuildRoot: %{_builddir}/%{name}-%{version}-root
 BuildArch: noarch
 Requires: bash
 License: GPL

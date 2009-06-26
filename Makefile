@@ -1,5 +1,5 @@
 default:
-	echo "possible targets: install changelog"
+	echo "possible targets: install clean changelog"
 
 install:
 	install -d ${prefix}/etc/init.d
@@ -11,6 +11,8 @@ install:
 	install -d ${prefix}/var/chroot
 	install --mode=0644 bind-mount.conf ${prefix}/var/chroot/
 	install --mode=0644 sshd-port.conf ${prefix}/var/chroot/
+
+clean:
 
 include VERSION
 
