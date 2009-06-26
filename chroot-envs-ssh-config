@@ -16,6 +16,7 @@ for chenv in ${CHROOT_BASEDIR}/*; do
     if [ -d "${chenv}" ]; then 
         envname=$(basename $chenv)
         port=$(awk "/^$envname[ \t]/ { print \$2 }" $CHROOT_SSHD_PORT_CONF)
+        [ -z "${port}" ] && continue
         echo "Host $envname"
         echo "    UserKnownHostsFile ~/.ssh/chroot-${envname}-known_hosts"
         echo "    Hostname 127.0.0.1"
