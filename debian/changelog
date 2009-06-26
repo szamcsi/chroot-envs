@@ -1,3 +1,10 @@
+chroot-envs (0.6.1-1) intrepid jaunty; urgency=low
+
+  * Added new ssh ports for SLC5 and debian5.
+  * chroot-envs-ssh-config skips unknown chroot envs.
+
+ -- Frohner Ákos <akos@frohner.hu>  Fri, 26 Jun 2009 10:44:58 +0200
+
 chroot-envs (0.6.0-1) intrepid; urgency=low
 
   * sshd fix: if there is no 'Port' specified, then it needs to be added, and
